@@ -124,7 +124,7 @@ class Http {
         }
       })
       .then(response => {
-        // console.log('请求结果', response)
+        console.log('请求结果', response);
         if (hasHttpError || !response) {
           return {errorCode: -1};
         }

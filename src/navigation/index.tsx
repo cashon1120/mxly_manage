@@ -15,6 +15,12 @@ import {useStore} from '../models/global';
 
 // 配置页面
 import Login from '../screens/Login';
+import Home_Sale from '../screens/Home_Sale';
+import Home_Money from '../screens/Home_Money';
+import Home_Order from '../screens/Home_Order';
+import Home_Charge from '../screens/Home_Charge';
+import Home_Profit from '../screens/Home_Profit';
+import Home_Charge_Detail from '../screens/Home_Charge_Detail';
 
 const RootNavigator = (props: any) => {
   return (
@@ -27,6 +33,12 @@ const RootNavigator = (props: any) => {
       }}>
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="Root" component={BottomTabNavigator} />
+      <Stack.Screen name="Home_Sale" component={Home_Sale} />
+      <Stack.Screen name="Home_Money" component={Home_Money} />
+      <Stack.Screen name="Home_Order" component={Home_Order} />
+      <Stack.Screen name="Home_Charge" component={Home_Charge} />
+      <Stack.Screen name="Home_Profit" component={Home_Profit} />
+      <Stack.Screen name="Home_Charge_Detail" component={Home_Charge_Detail} />
     </Stack.Navigator>
   );
 };

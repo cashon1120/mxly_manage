@@ -22,7 +22,6 @@ interface IProps {
 
 const Header = (props: IProps) => {
   const strore = useStore('rootStore');
-  console.log(strore);
   const {
     text,
     textColor,
@@ -70,7 +69,12 @@ const Header = (props: IProps) => {
         </Text>
       </View>
       {rightElement ? (
-        <View style={styles.rightContent}>{rightElement}</View>
+        <>
+          <View style={{...styles.rightElement, top: strore.barHeight + 12}}>
+            {rightElement}
+          </View>
+          <Text style={styles.rightContent}>{''}</Text>
+        </>
       ) : (
         <TouchableOpacity onPress={rightTextEvent}>
           <Text style={styles.rightContent}>{rightText || ''}</Text>
@@ -113,5 +117,10 @@ const styles: any = StyleSheet.create({
     display: 'flex',
     justifyContent: 'flex-end',
     alignItems: 'center',
+  },
+  rightElement: {
+    position: 'absolute',
+    right: 15,
+    zIndex: 888,
   },
 });
