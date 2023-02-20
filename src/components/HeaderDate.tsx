@@ -17,8 +17,8 @@ import SelectedDate from './SelectedDate';
 import {replace_} from '../utils/commonUtils';
 
 let tempSelectedDate: any = {
-  beginTime: '',
-  endTime: '',
+  beginTime: dayjs(),
+  endTime: dayjs(),
 };
 
 const checkBeginTimeAndEndTime = (date: any) => {
@@ -104,7 +104,6 @@ const HeaderDate = (props: any) => {
   };
 
   const handleSelectedType = (type: number) => {
-    store.setSearchType(type);
     switch (type) {
       case 1:
         store.setSearchDate({
@@ -150,14 +149,18 @@ const HeaderDate = (props: any) => {
         break;
     }
     if (type <= 7) {
+      setTempType(0);
+      store.setSearchType(type);
       props.callback && props.callback();
       handleToggleVisible();
       return;
     }
+    setTempType(type);
     forceUpdate(new Date().getTime());
   };
-
+  const [tempType, setTempType] = useState(0);
   const handleSubmit = () => {
+    store.setSearchType(tempType);
     store.setSearchDate(tempSelectedDate);
     props.callback && props.callback();
     handleToggleVisible();
@@ -206,7 +209,7 @@ const HeaderDate = (props: any) => {
                 <Text style={styles.cancel}>取消</Text>
               </TouchableOpacity>
               <View style={globalStyle.flex_1} />
-              {selectedDateType >= 8 ? (
+              {tempType >= 8 ? (
                 <TouchableOpacity onPress={handleSubmit}>
                   <Text style={styles.submit}>确定</Text>
                 </TouchableOpacity>
@@ -221,7 +224,9 @@ const HeaderDate = (props: any) => {
                   <Text
                     style={[
                       styles.button,
-                      item.type === selectedDateType ? styles.selected : null,
+                      item.type === selectedDateType && tempType === 0
+                        ? styles.selected
+                        : null,
                     ]}>
                     {item.label}
                   </Text>
@@ -237,14 +242,14 @@ const HeaderDate = (props: any) => {
                   <Text
                     style={[
                       styles.button,
-                      item.type === selectedDateType ? styles.selected : null,
+                      item.type === tempType ? styles.selected : null,
                     ]}>
                     {item.label}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
-            {selectedDateType === 8 ? (
+            {tempType === 8 ? (
               <View style={globalStyle.flexBox}>
                 <DatePicker
                   date={date}
@@ -253,7 +258,7 @@ const HeaderDate = (props: any) => {
                 />
               </View>
             ) : null}
-            {selectedDateType === 11 ? (
+            {tempType === 11 ? (
               <SelectedDate callback={handleSelectedRangeChange} />
             ) : null}
           </SafeBottom>

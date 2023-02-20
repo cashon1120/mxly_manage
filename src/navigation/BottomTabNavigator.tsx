@@ -11,8 +11,8 @@ import {useAndroidBackHandler} from 'react-navigation-backhandler';
 import {BottomTabParamList} from './types';
 import BarIcon from './icon';
 import Home from '../screens/Tab_Home';
-import Monitor from '../screens/Tab_Monitor';
-import Report from '../screens/Tab_Report';
+// import Monitor from '../screens/Tab_Monitor';
+// import Report from '../screens/Tab_Report';
 import User from '../screens/Tab_User';
 
 const BottomTab = createBottomTabNavigator<BottomTabParamList>();
@@ -49,7 +49,7 @@ export default function BottomTabNavigator() {
           title: '首页',
         }}
       />
-      <BottomTab.Screen
+      {/* <BottomTab.Screen
         name="Monitor"
         component={Monitor}
         options={{
@@ -62,7 +62,7 @@ export default function BottomTabNavigator() {
         options={{
           title: '报表',
         }}
-      />
+      /> */}
       <BottomTab.Screen
         name="User"
         component={User}

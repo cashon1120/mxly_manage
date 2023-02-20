@@ -70,6 +70,7 @@ const Home = (props: any) => {
       })
       .finally(() => {
         setVisible(false);
+        setRefreshing(false);
       });
   };
 

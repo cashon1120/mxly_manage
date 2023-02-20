@@ -18,7 +18,6 @@ const getPayType = (type: number) => {
 
 const Home_Charge_Detail = (props: any) => {
   const data = props.route.params.orderInfo;
-  console.log(data);
   return (
     <View style={styles.wrapper}>
       <Header text="充值明细" navigation={props.navigation} />

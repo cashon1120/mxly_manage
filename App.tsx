@@ -36,6 +36,7 @@ const App = () => {
         });
     } else {
       setDefaultPage('Login');
+      setLoading(false);
     }
   };
 
