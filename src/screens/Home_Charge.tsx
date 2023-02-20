@@ -174,7 +174,6 @@ const Home_Charge = (props: any) => {
         res.result.dataList.forEach((item: any) => {
           item.key = index++;
         });
-        console.log('dataList', res.result.dataList);
         setData((oldData: any) => [...oldData, ...res.result.dataList]);
         setNoMore(res.result.dataList.length < 10);
       })
@@ -193,7 +192,6 @@ const Home_Charge = (props: any) => {
     if (!noMore && loadFlag.current) {
       currentPage.current = currentPage.current + 1;
       loadFlag.current = false;
-      console.log(123123123);
       getData();
     }
   };
@@ -229,7 +227,6 @@ const Home_Charge = (props: any) => {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    console.log('firstLoad', firstLoad);
     if (firstLoad.current) {
       return;
     }

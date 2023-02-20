@@ -11,10 +11,15 @@ import DatePicker from 'react-native-date-picker';
 import {useStore} from '../models/global';
 import dayjs from 'dayjs';
 import SafeBottom from './SafeBottom';
-import Picker from './Picker';
 import MyImage from './MyImage';
 import globalStyle from '../globalStyle';
+import SelectedDate from './SelectedDate';
 import {replace_} from '../utils/commonUtils';
+
+let tempSelectedDate: any = {
+  beginTime: '',
+  endTime: '',
+};
 
 const checkBeginTimeAndEndTime = (date: any) => {
   const beginTime = date.beginTime.format('MM-DD');
@@ -82,10 +87,10 @@ const HeaderDate = (props: any) => {
     //   label: '按月',
     //   type: 10,
     // },
-    // {
-    //   label: '自定义',
-    //   type: 11,
-    // },
+    {
+      label: '自定义',
+      type: 11,
+    },
   ]);
 
   const getType = (type: number) => {
@@ -149,9 +154,12 @@ const HeaderDate = (props: any) => {
       handleToggleVisible();
       return;
     }
+    forceUpdate(new Date().getTime());
   };
 
   const handleSubmit = () => {
+    store.setSearchDate(tempSelectedDate);
+    props.callback && props.callback();
     handleToggleVisible();
   };
 
@@ -162,8 +170,22 @@ const HeaderDate = (props: any) => {
 
   const selectedDateType = store.searchParams.type;
   const [date, setDate] = useState(new Date());
+  const [, forceUpdate] = useState(0);
   const handleDateChange = (value: any) => {
-    console.log(value);
+    setDate(value);
+    tempSelectedDate = {
+      beginTime: dayjs(value),
+      endTime: dayjs(value),
+    };
+    forceUpdate(value);
+  };
+  const handleSelectedRangeChange = (rangeDate: any) => {
+    if (rangeDate.beginTime && rangeDate.endTime) {
+      tempSelectedDate = {
+        beginTime: dayjs(rangeDate.beginTime.timestamp),
+        endTime: dayjs(rangeDate.endTime.timestamp),
+      };
+    }
   };
   return (
     <>
@@ -206,7 +228,7 @@ const HeaderDate = (props: any) => {
                 </TouchableOpacity>
               ))}
             </View>
-            {/* <Text style={globalStyle.text1}>自定义</Text>
+            <Text style={globalStyle.text1}>自定义</Text>
             <View style={styles.buttonWrapper}>
               {customDateType.map(item => (
                 <TouchableOpacity
@@ -222,11 +244,18 @@ const HeaderDate = (props: any) => {
                 </TouchableOpacity>
               ))}
             </View>
-            <DatePicker
-              date={date}
-              mode="date"
-              onDateChange={handleDateChange}
-            /> */}
+            {selectedDateType === 8 ? (
+              <View style={globalStyle.flexBox}>
+                <DatePicker
+                  date={date}
+                  mode="date"
+                  onDateChange={handleDateChange}
+                />
+              </View>
+            ) : null}
+            {selectedDateType === 11 ? (
+              <SelectedDate callback={handleSelectedRangeChange} />
+            ) : null}
           </SafeBottom>
         </View>
         <TouchableWithoutFeedback onPress={handleToggleVisible}>

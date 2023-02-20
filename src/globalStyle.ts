@@ -9,6 +9,11 @@ const globalStyle = StyleSheet.create({
   flex_1: {
     flex: 1,
   },
+  contentCenter: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 
   // 首页详情页
   topBox: {

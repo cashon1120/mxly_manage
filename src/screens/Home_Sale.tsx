@@ -30,7 +30,6 @@ const OrderPreview = (props: any) => {
       })
       .then((res: any) => {
         if (res.errorCode === 0) {
-          console.log(res.result.itemList[0]);
           setData(res.result);
         }
       })

@@ -54,7 +54,7 @@ const SelectCompany = (props: Props) => {
       }
     });
 
-    return name.length > 8 ? name.substring(0, 8) + '...' : name;
+    return name.length > 6 ? name.substring(0, 6) + '...' : name;
   };
 
   const [, forceUpdate] = useState(0);
