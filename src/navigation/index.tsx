@@ -21,6 +21,7 @@ import Home_Order from '../screens/Home_Order';
 import Home_Charge from '../screens/Home_Charge';
 import Home_Profit from '../screens/Home_Profit';
 import Home_Charge_Detail from '../screens/Home_Charge_Detail';
+import Home_Order_Detail from '../screens/Home_Order_Detail';
 
 const RootNavigator = (props: any) => {
   return (
@@ -39,6 +40,7 @@ const RootNavigator = (props: any) => {
       <Stack.Screen name="Home_Charge" component={Home_Charge} />
       <Stack.Screen name="Home_Profit" component={Home_Profit} />
       <Stack.Screen name="Home_Charge_Detail" component={Home_Charge_Detail} />
+      <Stack.Screen name="Home_Order_Detail" component={Home_Order_Detail} />
     </Stack.Navigator>
   );
 };

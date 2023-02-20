@@ -1,32 +1,34 @@
-import React, {useState, useEffect} from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-} from 'react-native';
+import React from 'react';
+import {View, Text, StyleSheet} from 'react-native';
 import globalStyle from '../globalStyle';
-import MyImage from '../components/MyImage';
-import Header from '../components/Header';
 
-const Percent = (props: any) => {
+interface Props {
+  name: string;
+  num: number;
+  ratio: number;
+}
+
+const Percent = (props: Props) => {
+  const {name, num, ratio} = props;
   return (
-    <>
+    <View style={styles.container}>
       <View style={globalStyle.flexBox}>
-        <Text style={globalStyle.flex_1}>游乐园项目</Text>
-        <Text style={styles.text1}>8000</Text>
+        <Text style={globalStyle.flex_1}>{name}</Text>
+        <Text style={styles.text1}>{num}</Text>
         <Text style={styles.text2}>|</Text>
-        <Text style={styles.text3}>100%</Text>
+        <Text style={styles.text3}>{ratio}%</Text>
       </View>
       <View style={styles.wrapper}>
-        <View style={{...styles.in, width: '20%'}} />
+        <View style={{...styles.in, width: `${ratio}%`}} />
       </View>
-    </>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    paddingBottom: 15,
+  },
   wrapper: {
     backgroundColor: '#ddd',
     borderRadius: 2,
@@ -38,8 +40,9 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   text2: {
-    marginLeft: 10,
-    marginRight: 10,
+    marginLeft: 15,
+    marginRight: 15,
+    color: '#999',
   },
   text3: {
     color: '#999',

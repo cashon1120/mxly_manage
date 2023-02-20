@@ -7,16 +7,21 @@ import {
   BackHandler,
   TouchableWithoutFeedback,
   FlatList,
+  ScrollView,
 } from 'react-native';
 import Header from '../components/Header';
 import HeaderDate from '../components/HeaderDate';
 import {renderLoading, renderEnd} from '../components/FlatListItem';
 import NoData from '../components/NoData';
+import SelectCompany from '../components/SelectCompany';
+import dayjs from 'dayjs';
 import Loading from '../components/Loading';
 import MyImage from '../components/MyImage';
+import {useStore} from '../models/global';
 import http from '../utils/http';
 import globalStyle from '../globalStyle';
 
+let index = 0;
 interface SelectProps {
   title: string;
   onPress: any;
@@ -67,19 +72,18 @@ const Option = (props: OptionProps) => {
 };
 
 const Home_Charge = (props: any) => {
+  const store = useStore('rootStore');
   const [optionsType, setOptionsType] = useState<'' | 'payWay' | 'worker'>('');
+  const [selectedPayWay, setSelectedPayWay] = useState(-1);
   const [payWay, updatePayWay] = useState<OptionDataProps[]>([
     {name: '全部', type: -1, selected: true},
     {name: '微信', type: 2},
     {name: '支付宝', type: 3},
-    {name: '积分', type: 5},
-    {name: '余额', type: 0},
     {name: '现金', type: 1},
   ]);
-  const [worker, updateWorker] = useState<OptionDataProps[]>([
-    {name: '工作人员1', type: 1},
-    {name: '工作人员2', type: 2},
-  ]);
+  const [selectedWorker, setSelectedWorker] = useState(-1);
+  const [worker, updateWorker] = useState<OptionDataProps[]>([]);
+  const firstLoad = useRef(true);
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
@@ -117,9 +121,11 @@ const Home_Charge = (props: any) => {
     });
     switch (optionsType) {
       case 'payWay':
+        setSelectedPayWay(type);
         updatePayWay([...array]);
         break;
       case 'worker':
+        setSelectedWorker(type);
         updateWorker([...array]);
         break;
     }
@@ -140,7 +146,8 @@ const Home_Charge = (props: any) => {
   const [refreshing, setRefreshing] = useState(false);
   const [noMore, setNoMore] = useState(false);
   const [loaded, setLoaded] = useState(false);
-  const [data, setData] = useState<any>([{}]);
+  const [allData, setAllData] = useState<any>({});
+  const [data, setData] = useState<any>([]);
   const currentPage = useRef(1);
   const loadFlag = useRef(false);
 
@@ -148,17 +155,31 @@ const Home_Charge = (props: any) => {
     setLoading(true);
     http
       .postRequest({
-        url: 'sold/note/list',
-        params: {page: currentPage.current, pageSize: 10},
+        url: 'app/v1.0/playOrder/statistics/recharge',
+        params: {
+          page: currentPage.current,
+          pageSize: 10,
+          payWay: selectedPayWay,
+          checkerId: selectedWorker,
+          companyId: store.searchParams.companyId,
+          beginTime: store.searchParams.beginTime.format('YYYY-MM-DD'),
+          endTime: store.searchParams.endTime.format('YYYY-MM-DD'),
+        },
       })
       .then((res: any) => {
         if (res.errorCode !== 0) {
           return;
         }
-        setData((oldData: any) => [...oldData, ...res.result]);
-        setNoMore(res.result.length < 10);
+        setAllData(res.result);
+        res.result.dataList.forEach((item: any) => {
+          item.key = index++;
+        });
+        console.log('dataList', res.result.dataList);
+        setData((oldData: any) => [...oldData, ...res.result.dataList]);
+        setNoMore(res.result.dataList.length < 10);
       })
       .finally(() => {
+        firstLoad.current = false;
         setRefreshing(false);
         setLoading(false);
         setLoaded(true);
@@ -172,9 +193,28 @@ const Home_Charge = (props: any) => {
     if (!noMore && loadFlag.current) {
       currentPage.current = currentPage.current + 1;
       loadFlag.current = false;
+      console.log(123123123);
       getData();
     }
   };
+
+  useEffect(() => {
+    http
+      .postRequest({
+        method: 'GET',
+        url: 'app/v1.0/user/checkerList',
+      })
+      .then((res: any) => {
+        if (res.errorCode !== 0) {
+          return;
+        }
+        res.result.forEach((item: any) => {
+          item.type = item.key;
+        });
+        updateWorker([{name: '全部', type: -1}, ...res.result]);
+      })
+      .finally(() => {});
+  }, []);
 
   const handleOnRefresh = () => {
     currentPage.current = 1;
@@ -187,7 +227,25 @@ const Home_Charge = (props: any) => {
     loadFlag.current = false;
   };
 
-  useEffect(getData, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    console.log('firstLoad', firstLoad);
+    if (firstLoad.current) {
+      return;
+    }
+    handleOnRefresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPayWay, selectedWorker]);
+
+  const getPayWay = (type: number) => {
+    let res = '';
+    payWay.forEach(item => {
+      if (item.type === type) {
+        res = item.name;
+      }
+    });
+    return res;
+  };
 
   const renderItem = (itemProps: any) => {
     const {item} = itemProps;
@@ -198,22 +256,32 @@ const Home_Charge = (props: any) => {
         }>
         <View style={[globalStyle.flexBox, styles.list]}>
           <View style={globalStyle.flex_1}>
-            <Text style={styles.text1}>13982193130</Text>
-            <Text style={[styles.text1, styles.centerText]}>微信支付</Text>
-            <Text style={globalStyle.text2}>2023-01-12</Text>
+            <Text style={styles.text1}>{item.memberName}</Text>
+            <Text style={[styles.text1, styles.centerText]}>
+              {getPayWay(item.payWay)}
+            </Text>
+            <Text style={globalStyle.text2}>
+              {dayjs(item.rechargeTime * 1000).format('YYYY-MM-DD')}
+            </Text>
           </View>
-          <Text style={styles.money}>+200</Text>
+          <Text style={styles.money}>+{item.actualMoney}</Text>
         </View>
       </TouchableOpacity>
     );
   };
 
+  useEffect(() => {
+    getData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <View style={styles.wrapper}>
       <Header
         text="总销售明细"
+        titleElement={<SelectCompany callback={handleOnRefresh} />}
         navigation={props.navigation}
-        rightElement={<HeaderDate />}
+        rightElement={<HeaderDate callback={handleOnRefresh} />}
       />
       <View
         style={[globalStyle.topBox, globalStyle.flexBox, styles.selectWrapper]}>
@@ -230,14 +298,16 @@ const Home_Charge = (props: any) => {
       </View>
       {selectedOptions.length > 0 ? (
         <View style={styles.optionWrapper}>
-          {selectedOptions.map(item => (
-            <Option
-              text={item.name}
-              key={item.type}
-              selected={item.selected}
-              onPress={() => handleUpdateSelected(item.type)}
-            />
-          ))}
+          <ScrollView>
+            {selectedOptions.map(item => (
+              <Option
+                text={item.name}
+                key={item.type}
+                selected={item.selected}
+                onPress={() => handleUpdateSelected(item.type)}
+              />
+            ))}
+          </ScrollView>
         </View>
       ) : null}
       {optionsType ? (
@@ -260,15 +330,15 @@ const Home_Charge = (props: any) => {
                   <View style={[globalStyle.flex_1]}>
                     <View style={globalStyle.flexBox}>
                       <Text style={globalStyle.text1}>充值金额</Text>
-                      <Text style={globalStyle.text2}>共19笔</Text>
+                      {/* <Text style={globalStyle.text2}>共19笔</Text> */}
                     </View>
-                    <Text style={styles.text3}>7040</Text>
+                    <Text style={styles.text3}>{allData.actualMoney}</Text>
                   </View>
                   <View style={styles.alignRight}>
                     <Text style={{...globalStyle.text1, marginRight: 0}}>
                       赠送金额
                     </Text>
-                    <Text style={styles.text3}>7040</Text>
+                    <Text style={styles.text3}>{allData.giftMoney}</Text>
                   </View>
                 </View>
               </View>
@@ -282,7 +352,7 @@ const Home_Charge = (props: any) => {
                 renderLoading()
               ) : null
             }
-            keyExtractor={item => item.serialNo}
+            keyExtractor={item => item.key}
           />
         </View>
         <Loading visible={loading} />
@@ -303,6 +373,7 @@ const styles = StyleSheet.create({
   selectWrapper: {
     position: 'relative',
     zIndex: 99,
+    height: 45,
     backgroundColor: '#fff',
   },
   mask: {
@@ -329,6 +400,10 @@ const styles = StyleSheet.create({
   optionWrapper: {
     backgroundColor: '#fff',
     zIndex: 99,
+    maxHeight: 300,
+    top: 127,
+    position: 'absolute',
+    width: '100%',
   },
   options: {
     padding: 15,

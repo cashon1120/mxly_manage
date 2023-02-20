@@ -6,6 +6,7 @@ import {useStore} from '../models/global';
 import MyImage from './MyImage';
 import MyStatusBar, {BarStypeProps} from './MyStatusBar';
 import Text from './MyText';
+import globalStyle from '../globalStyle';
 
 interface IProps {
   text: string;
@@ -14,6 +15,7 @@ interface IProps {
   navigation?: any;
   rightText?: string;
   rightElement?: any;
+  titleElement?: any;
   backgroundColor?: string;
   rightTextEvent?: () => void;
   backEvent?: () => void;
@@ -21,7 +23,7 @@ interface IProps {
 }
 
 const Header = (props: IProps) => {
-  const strore = useStore('rootStore');
+  const store = useStore('rootStore');
   const {
     text,
     textColor,
@@ -33,10 +35,11 @@ const Header = (props: IProps) => {
     barStyle,
     disableBack,
     rightElement,
+    titleElement,
   } = props;
 
   const handleLayout = (e: any) => {
-    strore.setHeaderHeight(e.nativeEvent.layout.height);
+    store.setHeaderHeight(e.nativeEvent.layout.height);
   };
 
   const handleBack = () => {
@@ -51,8 +54,8 @@ const Header = (props: IProps) => {
       style={{
         ...styles.container,
         zIndex: 888,
-        paddingTop: strore.barHeight,
-        height: strore.barHeight + 48,
+        paddingTop: store.barHeight,
+        height: store.barHeight + 48,
         backgroundColor: backgroundColor || '#E75120',
         ...styles[barStyle ? barStyle : ''],
       }}
@@ -63,14 +66,18 @@ const Header = (props: IProps) => {
           <MyImage name={backUrl} width={40} height={40} />
         ) : null}
       </TouchableOpacity>
-      <View style={{flex: 1}}>
-        <Text style={{...styles.title, color: textColor || '#fff'}}>
-          {text}
-        </Text>
+      <View style={[globalStyle.flex_1, globalStyle.flexBox]}>
+        {titleElement && store.userInfo.companyID === 1 ? (
+          titleElement
+        ) : (
+          <Text style={{...styles.title, color: textColor || '#fff'}}>
+            {text}
+          </Text>
+        )}
       </View>
       {rightElement ? (
         <>
-          <View style={{...styles.rightElement, top: strore.barHeight + 12}}>
+          <View style={{...styles.rightElement, top: store.barHeight + 12}}>
             {rightElement}
           </View>
           <Text style={styles.rightContent}>{''}</Text>

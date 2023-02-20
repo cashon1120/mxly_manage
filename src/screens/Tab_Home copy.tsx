@@ -7,18 +7,55 @@ import {
   Dimensions,
   Animated,
 } from 'react-native';
+import {
+  VictoryLine,
+  VictoryTheme,
+  VictoryChart,
+  VictoryTooltip,
+  VictoryZoomContainer,
+} from 'victory-native';
 import {useFocusEffect} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MyStatusBar from '../components/MyStatusBar';
 import Header from '../components/Header';
 import HeaderDate from '../components/HeaderDate';
+import Card from '../components/Card';
 import Loading from '../components/Loading';
 import http from '../utils/http';
 import MyImage from '../components/MyImage';
-import SelectCompany from '../components/SelectCompany';
 import IndexData from '../components/IndexData';
 import globalStyle from '../globalStyle';
 import {useStore} from '../models/global';
+
+const getMaxDomain = (value: number) => {
+  const str = value.toFixed(0).toString();
+  const length = str.length;
+  const res = [];
+  res[0] = Number(str[0]) + 1;
+  for (let i = 0; i < length - 1; i++) {
+    res.push(0);
+  }
+  return Number(res.join(''));
+};
+
+const formatDate = (date: string) => {
+  const array = date.split('-');
+  return `${array[1]}-${array[2]}`;
+};
+
+const formatOnlineData = (data: any) => {
+  let maxDomain = 10;
+  const result: any = [];
+  Object.keys(data).forEach((key: string) => {
+    const value = data[key];
+    result.push({day: formatDate(key), number: value});
+    maxDomain = value > maxDomain ? value : maxDomain;
+  });
+  return {
+    data: result,
+    maxDomain: getMaxDomain(maxDomain),
+  };
+};
 
 const Home = (props: any) => {
   const store = useStore('rootStore');
@@ -36,7 +73,9 @@ const Home = (props: any) => {
   });
   const [visible, setVisible] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [monthOnlineList, setMonthOnlineList] = useState([]);
   const [headerVisible, setHeaderVisible] = useState(false);
+  const [maxDomain, setMaxDomain] = useState(10);
   const getStorage = async () => {
     let userInfo: any = await AsyncStorage.getItem('@user_info');
     userInfo = JSON.parse(userInfo || '{}');
@@ -91,7 +130,7 @@ const Home = (props: any) => {
     }
   };
 
-  const handleParamsChange = () => {
+  const handleDateChange = () => {
     getData();
   };
 
@@ -105,6 +144,9 @@ const Home = (props: any) => {
       useNativeDriver: true,
     }).start();
   }, [fadeAnim, headerVisible]);
+
+  const chartLeft: number = maxDomain.toString().length * 10 + 15;
+  const maxDomainProps = maxDomain >= 10 ? {maxDomain: {y: maxDomain}} : {};
 
   const [, fourceUpdate] = useState(0);
   useFocusEffect(
@@ -120,9 +162,9 @@ const Home = (props: any) => {
       <View style={styles.background} />
       <View style={styles.bg}>
         <Header
-          titleElement={<SelectCompany callback={handleParamsChange} />}
+          showSelectCompany={store.userInfo.companyID === 1}
           text="萌熊猫乐园"
-          rightElement={<HeaderDate callback={handleParamsChange} />}
+          rightElement={<HeaderDate callback={handleDateChange} />}
           disableBack
         />
         <ScrollView

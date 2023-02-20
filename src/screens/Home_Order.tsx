@@ -1,35 +1,50 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {View, Text, StyleSheet, TouchableOpacity, FlatList} from 'react-native';
+import dayjs from 'dayjs';
 import Header from '../components/Header';
 import {renderLoading, renderEnd} from '../components/FlatListItem';
 import HeaderDate from '../components/HeaderDate';
+import SelectCompany from '../components/SelectCompany';
+import {PayType} from '../utils/enums';
 import NoData from '../components/NoData';
+import {useStore} from '../models/global';
 import Loading from '../components/Loading';
 import http from '../utils/http';
 import globalStyle from '../globalStyle';
-
+let index = 0;
 const Home_Order = (props: any) => {
+  const store = useStore('rootStore');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [noMore, setNoMore] = useState(false);
   const [loaded, setLoaded] = useState(false);
-  const [data, setData] = useState<any>([{}]);
+  const [data, setData] = useState<any>([]);
+  const [dataCount, setDataCount] = useState(0);
   const currentPage = useRef(1);
   const loadFlag = useRef(false);
-
   const getData = () => {
     setLoading(true);
     http
       .postRequest({
-        url: 'sold/note/list',
-        params: {page: currentPage.current, pageSize: 10},
+        url: 'app/v1.0/playOrder/statistics/play',
+        params: {
+          page: currentPage.current,
+          pageSize: 10,
+          companyId: store.searchParams.companyId,
+          beginTime: store.searchParams.beginTime.format('YYYY-MM-DD'),
+          endTime: store.searchParams.endTime.format('YYYY-MM-DD'),
+        },
       })
       .then((res: any) => {
         if (res.errorCode !== 0) {
           return;
         }
-        setData((oldData: any) => [...oldData, ...res.result]);
-        setNoMore(res.result.length < 10);
+        setDataCount(res.result.dataCount);
+        res.result.dataList.forEach((item: any) => {
+          item.key === index++;
+        });
+        setData((oldData: any) => [...oldData, ...res.result.dataList]);
+        setNoMore(res.result.dataList.length < 10);
       })
       .finally(() => {
         setRefreshing(false);
@@ -60,33 +75,51 @@ const Home_Order = (props: any) => {
     loadFlag.current = false;
   };
 
-  useEffect(getData, []);
+  const getPayWay = (type: number) => {
+    let res = '';
+    PayType.forEach(item => {
+      if (item.type === type) {
+        res = item.name;
+      }
+    });
+    return res;
+  };
 
   const renderItem = (itemProps: any) => {
     const {item} = itemProps;
     return (
       <TouchableOpacity
         onPress={() =>
-          props.navigation.navigate('Home_Charge_Detail', {orderInfo: item})
+          props.navigation.navigate('Home_Order_Detail', {orderInfo: item})
         }>
         <View style={[globalStyle.flexBox, styles.list]}>
           <View style={globalStyle.flex_1}>
-            <Text style={styles.text1}>23492349234234234234</Text>
-            <Text style={[styles.text1, styles.centerText]}>微信支付</Text>
-            <Text style={globalStyle.text2}>2023-01-12</Text>
+            <Text style={styles.text1}>{item.memberName}</Text>
+            <Text style={[styles.text1, styles.centerText]}>
+              {getPayWay(item.payWay)}
+            </Text>
+            <Text style={globalStyle.text2}>
+              {dayjs(item.orderTime * 1000).format('YYYY-MM-DD')}
+            </Text>
           </View>
-          <Text style={styles.money}>+200</Text>
+          <Text style={styles.money}>+{item.paidInMoney}</Text>
         </View>
       </TouchableOpacity>
     );
   };
 
+  useEffect(() => {
+    getData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <View style={styles.wrapper}>
       <Header
         text="订单明细"
+        titleElement={<SelectCompany callback={handleOnRefresh} />}
         navigation={props.navigation}
-        rightElement={<HeaderDate />}
+        rightElement={<HeaderDate callback={handleOnRefresh} />}
       />
       <View style={globalStyle.flex_1}>
         <View style={{height: '100%'}}>
@@ -104,7 +137,7 @@ const Home_Order = (props: any) => {
                     <View style={globalStyle.flexBox}>
                       <Text style={globalStyle.text1}>订单数</Text>
                     </View>
-                    <Text style={styles.text3}>7040</Text>
+                    <Text style={styles.text3}>{dataCount}</Text>
                   </View>
                 </View>
               </View>
@@ -118,7 +151,7 @@ const Home_Order = (props: any) => {
                 renderLoading()
               ) : null
             }
-            keyExtractor={item => item.serialNo}
+            keyExtractor={item => item.key}
           />
         </View>
         <Loading visible={loading} />

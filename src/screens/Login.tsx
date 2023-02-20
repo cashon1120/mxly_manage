@@ -55,11 +55,12 @@ const Login = (props: IProps) => {
     }
     setLoading(true);
     http
-      .postRequest({url: 'mp/v1.0/user/login', params: formValue})
+      .postRequest({url: 'app/v1.0/user/login', params: formValue})
       .then((res: any) => {
         switch (res.errorCode) {
           case 0:
             store.setToken(res.result.token);
+            store.setUserInfo(res.result);
             saveLoginInfo(res.result, formValue);
             navigation.replace('Root');
             break;

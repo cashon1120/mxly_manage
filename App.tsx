@@ -15,11 +15,10 @@ const App = () => {
   const getStorage = async () => {
     const info = await AsyncStorage.getItem('@user_info');
     const loginInfo = await AsyncStorage.getItem('@login_info');
-    setLoading(false);
     const params = JSON.parse(loginInfo || '{}');
     if (info && params && params.userName && params.password) {
       http
-        .postRequest({url: 'mp/v1.0/user/login', params})
+        .postRequest({url: 'app/v1.0/user/login', params})
         .then((res: any) => {
           switch (res.errorCode) {
             case 0:

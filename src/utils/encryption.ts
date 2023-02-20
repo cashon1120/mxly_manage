@@ -10,11 +10,11 @@ const newNonce = () => {
   return nonce;
 };
 
-const encryption = (headers: any, url: string) => {
+const encryption = (headers: any, url: string, method = 'POST') => {
   const newNonceStr = newNonce();
   const timestamp = Math.floor(dayjs().valueOf() / 1000);
   const signatureObj: any = {
-    method: 'POST',
+    method,
     url: encodeURI(`/${url}`),
     nonce: newNonceStr,
     timestamp,

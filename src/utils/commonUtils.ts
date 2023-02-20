@@ -22,16 +22,7 @@ export const getComponentInfo = (event: any) => {
 };
 
 export const saveLoginInfo = (res: any, params: any) => {
-  const {token, userName, avatar, permissionMap} = res;
-  AsyncStorage.setItem(
-    '@user_info',
-    JSON.stringify({
-      token,
-      userName,
-      avatar,
-      permissionMap,
-    }),
-  );
+  AsyncStorage.setItem('@user_info', JSON.stringify(res));
   AsyncStorage.setItem('@login_info', JSON.stringify(params));
 };
 
@@ -63,4 +54,8 @@ export const formatNumber = (value: number) => {
     return Number(value.toFixed(2));
   }
   return value;
+};
+
+export const replace_ = (date: string) => {
+  return date.replace(/-/g, '/');
 };

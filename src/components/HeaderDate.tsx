@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   StyleSheet,
   View,
@@ -7,17 +7,35 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
 } from 'react-native';
+import DatePicker from 'react-native-date-picker'
+import {useStore} from '../models/global';
+import dayjs from 'dayjs';
 import SafeBottom from './SafeBottom';
+import Picker from './Picker';
 import MyImage from './MyImage';
 import globalStyle from '../globalStyle';
+import {replace_} from '../utils/commonUtils';
+
+const checkBeginTimeAndEndTime = (date: any) => {
+  const beginTime = date.beginTime.format('MM-DD');
+  const endTime = date.endTime.format('MM-DD');
+  if (beginTime === endTime) {
+    return replace_(beginTime);
+  }
+  return `${replace_(beginTime)}-${replace_(endTime)}`;
+};
 
 interface DateType {
   label: string;
   type: number;
 }
 
-const HeaderDate = () => {
+const HeaderDate = (props: any) => {
+  const store = useStore('rootStore');
   const [visible, setVisible] = useState(false);
+  const [currentDate, setCurrentDate] = useState(
+    checkBeginTimeAndEndTime(store.searchParams),
+  );
   const handleToggleVisible = () => {
     setVisible(!visible);
   };
@@ -69,24 +87,86 @@ const HeaderDate = () => {
       type: 11,
     },
   ]);
-  const [selectedDateType, setSelectedDateType] = useState(1);
+
+  const getType = (type: number) => {
+    let res = '';
+    [...dateType, ...customDateType].forEach(item => {
+      if (item.type === type) {
+        res = item.label;
+      }
+    });
+    return res;
+  };
 
   const handleSelectedType = (type: number) => {
-    setSelectedDateType(type);
+    store.setSearchType(type);
+    switch (type) {
+      case 1:
+        store.setSearchDate({
+          beginTime: dayjs(),
+          endTime: dayjs(),
+        });
+        break;
+      case 2:
+        store.setSearchDate({
+          beginTime: dayjs().add(-1, 'day'),
+          endTime: dayjs().add(-1, 'day'),
+        });
+        break;
+      case 3:
+        store.setSearchDate({
+          beginTime: dayjs().add(-7, 'day'),
+          endTime: dayjs(),
+        });
+        break;
+      case 4:
+        store.setSearchDate({
+          beginTime: dayjs().startOf('week').add(1, 'day'),
+          endTime: dayjs().endOf('week').add(1, 'day'),
+        });
+        break;
+      case 5:
+        store.setSearchDate({
+          beginTime: dayjs().startOf('month'),
+          endTime: dayjs().endOf('month'),
+        });
+        break;
+      case 6:
+        store.setSearchDate({
+          beginTime: dayjs().add(-1, 'week').startOf('week').add(1, 'day'),
+          endTime: dayjs().add(-1, 'week').endOf('week').add(1, 'day'),
+        });
+        break;
+      case 7:
+        store.setSearchDate({
+          beginTime: dayjs().add(-1, 'month').startOf('month'),
+          endTime: dayjs().add(-1, 'month').endOf('month'),
+        });
+        break;
+    }
+    props.callback && props.callback();
+    handleToggleVisible();
   };
 
   const handleSubmit = () => {
     handleToggleVisible();
   };
 
+  useEffect(() => {
+    setCurrentDate(checkBeginTimeAndEndTime(store.searchParams));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [store.searchParams]);
+
+  const selectedDateType = store.searchParams.type;
+  const [date, setDate] = useState(new Date());
   return (
     <>
       <TouchableOpacity onPress={handleToggleVisible}>
         <View style={[globalStyle.flexBox]}>
           <MyImage name="icon_date" width={40} height={40} />
           <View style={styles.textWrapper}>
-            <Text style={styles.text}>上周</Text>
-            <Text style={[styles.text, styles.smallText]}>02/06-03/15</Text>
+            <Text style={styles.text}>{getType(selectedDateType)}</Text>
+            <Text style={[styles.text, styles.smallText]}>{currentDate}</Text>
           </View>
         </View>
       </TouchableOpacity>
@@ -136,6 +216,7 @@ const HeaderDate = () => {
                 </TouchableOpacity>
               ))}
             </View>
+            <DatePicker date={date} onDateChange={setDate} />
           </SafeBottom>
         </View>
         <TouchableWithoutFeedback onPress={handleToggleVisible}>

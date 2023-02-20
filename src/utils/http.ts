@@ -44,6 +44,7 @@ const timeoutFetch = (original_fetch: any, timeout = 60000) => {
 
 interface Params {
   url: string;
+  method?: 'POST' | 'GET';
   params?: any;
   header?: any;
 }
@@ -74,7 +75,7 @@ class Http {
 
   fetchKeys: any = {};
   postRequest = async (options: Params) => {
-    const {url, params, header} = options;
+    const {url, params, method = 'POST', header} = options;
     this.addKey(url);
     let postUrl = CONFIG.API_URL;
     if (params && params.version) {
@@ -89,7 +90,7 @@ class Http {
       token = JSON.parse(storageUserInfo).token;
     }
     headers.Authorization = token;
-    encryption(headers, url);
+    encryption(headers, url, method);
 
     console.log('请求地址: ' + postUrl + url);
     console.log('请求参数: ' + JSON.stringify(params));
@@ -97,7 +98,7 @@ class Http {
     let hasHttpError = false;
     return timeoutFetch(
       fetch(postUrl + url, {
-        method: 'POST',
+        method,
         headers,
         body: JSON.stringify(params),
       }),
@@ -124,7 +125,7 @@ class Http {
         }
       })
       .then(response => {
-        console.log('请求结果', response);
+        // console.log('请求结果', response);
         if (hasHttpError || !response) {
           return {errorCode: -1};
         }
