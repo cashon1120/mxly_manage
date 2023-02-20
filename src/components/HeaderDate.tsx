@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
 } from 'react-native';
-import DatePicker from 'react-native-date-picker'
+import DatePicker from 'react-native-date-picker';
 import {useStore} from '../models/global';
 import dayjs from 'dayjs';
 import SafeBottom from './SafeBottom';
@@ -74,18 +74,18 @@ const HeaderDate = (props: any) => {
       label: '按日',
       type: 8,
     },
-    {
-      label: '按周',
-      type: 9,
-    },
-    {
-      label: '按月',
-      type: 10,
-    },
-    {
-      label: '自定义',
-      type: 11,
-    },
+    // {
+    //   label: '按周',
+    //   type: 9,
+    // },
+    // {
+    //   label: '按月',
+    //   type: 10,
+    // },
+    // {
+    //   label: '自定义',
+    //   type: 11,
+    // },
   ]);
 
   const getType = (type: number) => {
@@ -144,8 +144,11 @@ const HeaderDate = (props: any) => {
         });
         break;
     }
-    props.callback && props.callback();
-    handleToggleVisible();
+    if (type <= 7) {
+      props.callback && props.callback();
+      handleToggleVisible();
+      return;
+    }
   };
 
   const handleSubmit = () => {
@@ -159,6 +162,9 @@ const HeaderDate = (props: any) => {
 
   const selectedDateType = store.searchParams.type;
   const [date, setDate] = useState(new Date());
+  const handleDateChange = (value: any) => {
+    console.log(value);
+  };
   return (
     <>
       <TouchableOpacity onPress={handleToggleVisible}>
@@ -200,7 +206,7 @@ const HeaderDate = (props: any) => {
                 </TouchableOpacity>
               ))}
             </View>
-            <Text style={globalStyle.text1}>自定义</Text>
+            {/* <Text style={globalStyle.text1}>自定义</Text>
             <View style={styles.buttonWrapper}>
               {customDateType.map(item => (
                 <TouchableOpacity
@@ -216,7 +222,11 @@ const HeaderDate = (props: any) => {
                 </TouchableOpacity>
               ))}
             </View>
-            <DatePicker date={date} onDateChange={setDate} />
+            <DatePicker
+              date={date}
+              mode="date"
+              onDateChange={handleDateChange}
+            /> */}
           </SafeBottom>
         </View>
         <TouchableWithoutFeedback onPress={handleToggleVisible}>
