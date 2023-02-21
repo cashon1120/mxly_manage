@@ -254,6 +254,8 @@ const HeaderDate = (props: any) => {
                 <DatePicker
                   date={date}
                   mode="date"
+                  minimumDate={new Date('2022-01-01')}
+                  maximumDate={new Date()}
                   onDateChange={handleDateChange}
                 />
               </View>

@@ -61,6 +61,7 @@ const Home = (props: any) => {
       })
       .then((res: any) => {
         if (res.errorCode === 0) {
+          console.log(res.result);
           setData(res.result);
           // const weekList = res.result.datePlayCount;
           // const formatData = formatOnlineData(weekList);

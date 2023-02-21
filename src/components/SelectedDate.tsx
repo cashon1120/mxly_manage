@@ -9,12 +9,12 @@ import {
 import dayjs from 'dayjs';
 import globalStyle from '../globalStyle';
 
-const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+const weekdays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
 const width = Dimensions.get('window').width;
-
+const todayTimestamp = dayjs().valueOf();
 const getMonthDates = (day: any) => {
   const dates = [];
-  const startDay = day.date(1).day();
+  const startDay = day.date(0).day();
   const endDate = day.endOf('month').date();
   const month = day.month() + 1;
   const year = day.year();
@@ -56,6 +56,9 @@ const SelectedDate = (props: Props) => {
   };
 
   const handleSetDate = (date: any) => {
+    if (date.timestamp > todayTimestamp) {
+      return;
+    }
     if (!beginTime && !endTime) {
       setBeginTime(date);
       setEndTime(date);
@@ -85,13 +88,15 @@ const SelectedDate = (props: Props) => {
     <>
       <View style={[globalStyle.flexBox]}>
         <TouchableOpacity onPress={() => handleChangeMonth(-1)}>
-          <Text>上一页</Text>
+          <Text style={globalStyle.font_14}>上一页</Text>
         </TouchableOpacity>
         <View style={[globalStyle.flex_1, globalStyle.contentCenter]}>
-          <Text style={styles.currentTime}>当前时间</Text>
+          <Text style={[styles.currentTime, globalStyle.font_16]}>
+            {currentMonth.format('YYYY-MM').replace('-', '年')}月
+          </Text>
         </View>
         <TouchableOpacity onPress={() => handleChangeMonth(1)}>
-          <Text>下一页</Text>
+          <Text style={globalStyle.font_14}>下一页</Text>
         </TouchableOpacity>
       </View>
       <View style={[globalStyle.flexBox, styles.week]}>
@@ -120,6 +125,7 @@ const SelectedDate = (props: Props) => {
                   item.timestamp <= endTime.timestamp
                     ? styles.selected
                     : null,
+                  item.timestamp > todayTimestamp ? styles.disabled : null,
                 ]}>
                 {item.date}
               </Text>
@@ -141,6 +147,7 @@ const styles = StyleSheet.create({
   itemText: {
     textAlign: 'center',
     paddingVertical: 10,
+    fontSize: 14,
   },
   currentTime: {
     color: '#333',
@@ -158,6 +165,9 @@ const styles = StyleSheet.create({
   endDate: {
     borderTopRightRadius: 5,
     borderBottomRightRadius: 5,
+  },
+  disabled: {
+    color: '#ccc',
   },
   week: {
     borderTopWidth: 1,

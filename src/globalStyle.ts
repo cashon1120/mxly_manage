@@ -14,6 +14,24 @@ const globalStyle = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  font_12: {
+    fontSize: 12,
+  },
+  font_14: {
+    fontSize: 14,
+  },
+  font_16: {
+    fontSize: 16,
+  },
+  font_18: {
+    fontSize: 18,
+  },
+  font_20: {
+    fontSize: 20,
+  },
+  font_24: {
+    fontSize: 24,
+  },
 
   // 首页详情页
   topBox: {
